@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Razorpay Payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+      <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form {
+            margin-top: 20px;
+            text-align: center;
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 200px;
+        }
+        button {
+            padding: 8px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<h1> Course List </h1>
+<body>
+	 <table id="paymentTable" border="1">
+        <thead>
+            <tr>
+                <th>Course Name</th>
+                <th>Price</th>
+                <th>Discount</th>
+                <th>Total Amount</th>
+            </tr>
+        </thead>
+        
+    </table>
+     <form id="paymentForm">
+        <input type="text" id="amount" name="amount" placeholder="Enter amount" required>
+        <button type="submit">Pay</button>
+    </form>
+
+    <script>
+       document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    	e.preventDefault();
+    var rupeeAmount = document.getElementById('amount').value;
+    
+    var paiseAmount = parseInt(rupeeAmount) * 100;
+
+    if (paiseAmount < 100) {
+        alert("Amount should be at least 1 rupee (100 paise)");
+        return;
+    }
+
+    fetch('/createPayment?amount=' + encodeURIComponent(paiseAmount), {
+        method: 'GET'
+    }).then(function(response) {
+        return response.json();
+    }).then(function(data) {
+        var options = {
+            "amount": paiseAmount, 
+     
+                    "key": "rzp_test_dCDDZosyWH26G6",
+                    "currency": "INR",
+                    "name": "Your Company Name",
+                    "description": "Test Payment",
+                    "order_id": data.orderId,
+                    "handler": function(response) {
+                        alert('Payment successful! Payment ID: ' + response.razorpay_payment_id);
+                    },
+                    "prefill": {
+                        "name": "Your Name",
+                        "email": "anandkr281198@gmail.com"
+                    },
+                    "theme": {
+                        "color": "#F37254"
+                    }
+                };
+                var rzp1 = new Razorpay(options);
+                rzp1.on('payment.failed', function (response){
+                    alert('Payment failed');
+                    // Handle payment failure
+                });
+                rzp1.open();
+            });
+        });
+var courseData = [
+    { name: "Java", price: 20000, discount: 10, totalAmount: 18000},
+    { name: "Python", price: 10000, discount: 10, totalAmount: 9000 },
+    { name: "Php", price: 15000, discount: 10, totalAmount: 13500},
+];
+
+var table = document.getElementById("paymentTable");
+
+courseData.forEach(function(course) {
+    var row = table.insertRow(-1); 
+
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    var cell3 = row.insertCell(2);
+    var cell4 = row.insertCell(3);
+
+
+    cell1.innerHTML = course.name;
+    cell2.innerHTML = course.price;
+    cell3.innerHTML = course.discount;
+    cell4.innerHTML = course.totalAmount;
+   
+});
+
+    </script>
+</body>
+</html>
